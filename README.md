@@ -19,7 +19,7 @@ Instructions: <https://github.com/facebookresearch/faiss>
 
 ## Usage
 
-### 1) Compute hashes
+### 1) Compute Perceptual hashes
 
 - On WDS datasets:
     
