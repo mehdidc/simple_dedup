@@ -15,11 +15,11 @@ Instructions: <https://github.com/facebookresearch/faiss>
 
 ## 3) Install requirements
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
 ## Usage
 
-### Compute hashes
+### 1) Compute hashes
 
 - On WDS datasets:
     
@@ -29,14 +29,14 @@ pip install -r requirements.txt
     
     `python cli.py compute-hashes imagenet1k <path_root_imagenet1k> --batch-size=10000 --workers=64 --out-path=hashes_imagenet1k.npz`
 
-### Build index
+### 2) Build index
 
 `python cli.py build-index hashes_upstream.npz --out-index=index_upstream.pkl  --out-meta=index_meta.pkl`
 
-### Find duplicates
+### 3) Find duplicates
 
 `python cli.py dupfind index_upstream.pkl hashes_imagenet1k.npz --threshold=1 --out-path=dups.csv`
 
-### Visualize duplicates
+### 4) Visualize duplicates
 
 `python cli.py build-html-visualizer index_meta.pkl  hashes_imagenet1k.npz imagenet1k ><path_root_imagenet1k>`
