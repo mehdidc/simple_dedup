@@ -15,7 +15,6 @@ from multiprocessing import Pool, cpu_count
 import numpy as np
 from PIL import Image
 import webdataset as wds
-import cv2
 
 from phash import DCTImageHash, MHImageHash
 from resizer import Resizer
