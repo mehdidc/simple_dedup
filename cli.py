@@ -178,7 +178,7 @@ def compute_hashes(
     print("Elapsed", elapsed, "impersec", nb/elapsed, "secperim", elapsed/nb)
     print("FINISHED")
 
-def build_index(pattern, *, out_index="index.pkl", out_meta="index_meta.pkl", dim_bits=64, key="phash_dct", index_type="binary_hash"):
+def build_index(pattern, *, out_index="index.pkl", out_meta="index_meta.parquet", dim_bits=64, key="phash_dct", index_type="binary_hash"):
     """
     Create an index from computed hashes (computed using `compute_hashes`) 
     Can be used to dedup
@@ -186,6 +186,8 @@ def build_index(pattern, *, out_index="index.pkl", out_meta="index_meta.pkl", di
     import joblib
     import faiss
     from glob import glob
+    import pyarrow as pa
+    import pyarrow.parquet as pq
     if index_type == "flat":
         index = faiss.IndexBinaryFlat(dim)
     elif index_type == "binary_hash":
@@ -209,7 +211,9 @@ def build_index(pattern, *, out_index="index.pkl", out_meta="index_meta.pkl", di
         urls.extend(url)
         index.add(hashes)
     faiss.write_index_binary(index, out)
-    joblib.dump({"url": urls}, out_meta)
+    df = pd.DataFrame({"url": urls})
+    table = pa.Table.from_pandas(df)
+    pq.write_table(table, out_meta)
 
     
 class DatasetWithHashWrapper:
@@ -248,7 +252,7 @@ def uint64_to_uint8_vec(dst):
     return dst
 
 
-def dupfind(upstream_index_path, downstream_hashes_path, threshold=1, out_path="dups.csv", key="phash_dct"):
+def dupfind(upstream_index_path, downstream_hashes_path, *, threshold=1, out_path="dups.csv", key="phash_dct"):
     """
     Find duplicates on a dataset based on computed hashes (`compute_hashes`) and using an index (`build_index`)
 
@@ -268,7 +272,8 @@ def dupfind(upstream_index_path, downstream_hashes_path, threshold=1, out_path="
     src = faiss.read_index_binary(upstream_index_path)
     dst = np.load(downstream_hashes_path)[key]
     dst = uint64_to_uint8_vec(dst)
-    print("Doing Range Search")
+
+    print(f"Doing range Search of {downstream_hashes_path} with index {upstream_index_path}")
     L, D, I = src.range_search(dst, threshold)
     rows = []
     nb = 0
@@ -279,8 +284,8 @@ def dupfind(upstream_index_path, downstream_hashes_path, threshold=1, out_path="
             rows.append({"index_upstream": ind , "index_downstream": i, "dist": d})
         if len(indices):
             nb += 1
-    print("NB dups:", nb)
-    print("Write dups to", out_path)
+    print("NB dups found:", nb)
+    print("Writing dups to", out_path)
     df = pd.DataFrame(rows)
     df.to_csv(out_path, index=False)
 
@@ -306,9 +311,10 @@ def build_html_visualizer(
     import hashlib
     import faiss
     from tqdm import tqdm
+    import pandas as pd
 
     print("Load upstream urls")
-    src_urls = np.array(joblib.load(upstream_meta_path)["url"])
+    src = pd.read_parquet(upstream_meta_path)
     print("Build downstream dataset")
     ds = build_dataset(
         dataset_name=dataset_name,
@@ -325,7 +331,7 @@ def build_html_visualizer(
     dst = dst.sort_values(by="index_downstream")
     for ind in tqdm(dst.index_downstream.unique()):
         upstream_indices = dst[dst.index_downstream==ind].index_upstream.values
-        urls = src_urls[upstream_indices] # get urls from upstream
+        urls = src.url[upstream_indices].values # get urls from upstream
         img, label = ds[ind] # get the image from downstream
         img = (img.resize((imresize, imresize)))
         by = BytesIO()
