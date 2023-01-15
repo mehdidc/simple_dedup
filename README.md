@@ -35,8 +35,8 @@ Instructions: <https://github.com/facebookresearch/faiss>
 
 ### 3) Find duplicates
 
-`python cli.py dupfind index_upstream.pkl hashes_imagenet1k.npz --threshold=1 --out-path=dups.csv`
+`python cli.py dupfind index_upstream.pkl hashes_imagenet1k.npz --threshold=1 --out-path=dups_imagenet1k.csv`
 
 ### 4) Visualize duplicates
 
-`python cli.py build-html-visualizer index_meta.pkl  hashes_imagenet1k.npz imagenet1k ><path_root_imagenet1k>`
+`python cli.py build-html-visualizer index_meta.pkl  dups_imagenet1k.csv imagenet1k <path_root_imagenet1k>`
