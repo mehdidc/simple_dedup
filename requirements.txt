@@ -3,5 +3,9 @@ webdataset
 clip_benchmark
 pandas
 joblib
+pillow
+numpy
 pyarrow
 tqdm
+opencv-python
+torch
