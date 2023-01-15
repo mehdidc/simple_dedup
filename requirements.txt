@@ -1,0 +1,7 @@
+clize
+webdataset
+clip_benchmark
+pandas
+joblib
+pyarrow
+tqdm
