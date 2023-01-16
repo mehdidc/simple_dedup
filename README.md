@@ -31,7 +31,7 @@ Instructions: <https://github.com/facebookresearch/faiss>
 
 ### 2) Build index
 
-`python cli.py build-index hashes_upstream.npz --out-index=index_upstream.pkl  --out-meta=index_meta.pkl`
+`python cli.py build-index hashes_upstream.npz --out-index=index_upstream.pkl  --out-meta=index_meta.parquet`
 
 ### 3) Find duplicates
 
@@ -39,4 +39,4 @@ Instructions: <https://github.com/facebookresearch/faiss>
 
 ### 4) Visualize duplicates
 
-`python cli.py build-html-visualizer index_meta.pkl  dups_imagenet1k.csv imagenet1k <path_root_imagenet1k>`
+`python cli.py build-html-visualizer index_meta.parquet  dups_imagenet1k.csv imagenet1k <path_root_imagenet1k>`
